@@ -22,10 +22,8 @@ router.post("/", function (req, res, next) {
     })
     .catch((err) => {
       console.log(err);
-      res.status(500).send("Server Error");
+      res.status(500).send(err);
     });
-
-  res.render("index", { title: "Express" });
 });
 
 module.exports = router;

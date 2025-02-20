@@ -30,5 +30,21 @@
     "discount": 0,
     "stock": 120,
     "description": "tan nhien"
+  },
+  {
+    "id": 6,
+    "name": "123 test hot fan",
+    "price": 300,
+    "discount": 0,
+    "stock": 120,
+    "description": "tan nhien"
+  },
+  {
+    "id": 9,
+    "name": "123 test hot fan",
+    "price": 300,
+    "discount": 0,
+    "stock": 120,
+    "description": "tan nhien"
   }
 ]
