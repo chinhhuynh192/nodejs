@@ -1,28 +1,55 @@
+const yup = require("yup");
 var express = require("express");
 var router = express.Router();
-const { default: mongoose } = require("mongoose");
 const { Product } = require("../models");
-mongoose.connect("mongodb://localhost:27017/online-shop");
+const ObjectId = require("mongodb").ObjectId;
 
 /* GET home page. */
-router.get("/", function (req, res, next) {
-  res.render("index", { title: "Express" });
+router.get("/", async (req, res, next) => {
+  try {
+    let result = await Product.find()
+      .populate("category")
+      .populate("supplier")
+      .lean({ virtuals: true });
+    res.send(result);
+  } catch (err) {
+    res.sendStatus(500);
+  }
 });
-router.post("/", function (req, res, next) {
-  //todo: add a new Product to database
-  const data = req.body;
-  const newItem = new Product(data);
+router.post("/", async function (req, res, next) {
+  // Validate
+  const validationSchema = yup.object({
+    body: yup.object({
+      name: yup.string().required(),
+      price: yup.number().positive().required(),
+      discount: yup.number().min(0).max(50).required().default(0),
+      stock: yup.number().min(0).default(0),
+      // categoryId: yup
+      //   .string()
+      //   .required()
+      //   .test("Validate ObjectID", "${path} is not valid ObjectID", (value) => {
+      //     return ObjectId.isValid(value);
+      //   }),
+    }),
+  });
 
-  newItem
-    .save()
-    .then((result) => {
-      newItem.save().then((result) => {
-        res.json(result);
-      });
+  validationSchema
+    .validate({ body: req.body }, { abortEarly: false })
+    .then(async () => {
+      try {
+        const data = req.body;
+        const newItem = new Product(data);
+        let result = await newItem.save();
+
+        return res.send(result);
+      } catch (err) {
+        return res.status(500).json({ error: err.message });
+      }
     })
     .catch((err) => {
-      console.log(err);
-      res.status(500).send(err);
+      return res
+        .status(400)
+        .json({ type: err.name, errors: err.errors, provider: "yup" });
     });
 });
 

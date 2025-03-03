@@ -4,12 +4,19 @@ var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 const cors = require("cors");
+const { default: mongoose } = require("mongoose");
+
+// IMPORTS
 
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 var categoriesRouter = require("./routes/categories");
-var customersRouter = require("./routes/customers");
+var suppliersRouter = require("./routes/suppliers");
 var productsRouter = require("./routes/products");
+var customersRouter = require("./routes/customers");
+var employeesRouter = require("./routes/employees");
+var ordersRouter = require("./routes/orders");
+
 
 var app = express();
 
@@ -22,12 +29,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
-//cors
+//cors cho phép bên ngoài truy cập api
 app.use(
   cors({
     origin: "*",
   })
 );
+
+//mongoose
+mongoose.connect("mongodb://localhost:27017/online-shop");
 
 //register routes
 app.use("/", indexRouter);
@@ -35,6 +45,10 @@ app.use("/users", usersRouter);
 app.use("/categories", categoriesRouter);
 app.use("/customers", customersRouter);
 app.use("/products", productsRouter);
+app.use("/suppliers", suppliersRouter);
+app.use("/employees", employeesRouter);
+app.use("/orders", ordersRouter);
+
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
