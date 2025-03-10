@@ -52,5 +52,90 @@ router.post("/", async function (req, res, next) {
         .json({ type: err.name, errors: err.errors, provider: "yup" });
     });
 });
-
+//QUERY
+//1a. Hiển thị tất cả các mặt hàng có giảm giá <= 10%
+router.get("/questions/1a", async (req, res) => {
+  try {
+    let query = { discount: { $gte: 10 } };
+    let result = await Product.find(query);
+    res.send(result);
+  } catch (err) {
+    res.sendStatus(500);
+  }
+});
+//1b. Hiển thị tất cả các mặt hàng có giảm giá <= 10%,
+// và chi tiết danh mục, nhà cung cấp
+router.get("/questions/1b", async (req, res) => {
+  try {
+    let query = { discount: { $gte: 10 } };
+    let result = await Product.find(query)
+      .populate("category")
+      .populate("supplier")
+      .lean({ virtuals: true });
+    res.send(result);
+  } catch (err) {
+    res.sendStatus(500);
+  }
+});
+//1c. Hiển thị tất cả các mặt hàng có giảm giá <= n,
+// và chi tiết danh mục, nhà cung cấp
+router.get("/questions/1c", async (req, res) => {
+  try {
+    let discount = req.query.discount;
+    let query = { discount: { $gte: discount } };
+    let result = await Product.find(query)
+      .populate("category")
+      .populate("supplier")
+      .lean({ virtuals: true });
+    res.send(result);
+  } catch (err) {
+    res.sendStatus(500);
+  }
+});
+//1D.Hiển thị tất cả các mặt hàng có tồn kho <= 5,
+// và chi tiết danh mục, nhà cung cấp
+router.get("/questions/1d", async (req, res) => {
+  try {
+    let query = { stock: { $gte: 10 } };
+    let result = await Product.find(query)
+      .populate("category")
+      .populate("supplier")
+      .lean({ virtuals: true });
+    res.send(result);
+  } catch (err) {
+    res.sendStatus(500);
+  }
+});
+//3a. Hiển thị tất cả các mặt hàng có
+// Giá bán sau khi đã tính giảm giá <= 1000
+router.get("/questions/3a", async (req, res) => {
+  try {
+    // let finalPrice = price * (100 - discount) / 100;
+    const s = { $subtract: [100, "$discount"] };
+    const m = { $multiply: ["$price", s] };
+    const d = { $divide: [m, 100] };
+    let query = { $expr: { $lte: [d, parseFloat(1000)] } };
+    let result = await Product.find(query);
+    res.send(result);
+  } catch (err) {
+    res.sendStatus(500);
+  }
+});
+//3b.Hiển thị tất cả các mặt hàng có
+// Giá bán sau khi đã tính giảm giá <= n
+// http://localhost:9000/products/questions/3?price=100000
+router.get("/questions/3b", async (req, res) => {
+  try {
+    // let finalPrice = price * (100 - discount) / 100;
+    let price = req.query.price;
+    const s = { $subtract: [100, "$discount"] };
+    const m = { $multiply: ["$price", s] };
+    const d = { $divide: [m, 100] };
+    let query = { $expr: { $lte: [d, parseFloat(price)] } };
+    let result = await Product.find(query);
+    res.send(result);
+  } catch (err) {
+    res.sendStatus(500);
+  }
+});
 module.exports = router;
