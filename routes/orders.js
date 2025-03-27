@@ -28,4 +28,37 @@ router.post("/", async function (req, res, next) {
     return res.status(500).json({ error: err });
   }
 });
+//patch
+
+router.patch("/:id", async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const data = req.body;
+
+    let found = await Order.findByIdAndUpdate(id, data, { new: true });
+
+    if (found) {
+      return res.json(found);
+    }
+
+    return res.sendStatus(404);
+  } catch (err) {
+    return res.status(500).json({ error: err });
+  }
+});
+router.delete("/:id", async (req, res, next) => {
+  try {
+    const id = req.params.id;
+
+    let found = await Order.findByIdAndDelete(id);
+
+    if (found) {
+      return res.json(found);
+    }
+
+    return res.sendStatus(410);
+  } catch (err) {
+    return res.status(500).json({ error: err });
+  }
+});
 module.exports = router;

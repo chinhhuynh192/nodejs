@@ -80,10 +80,48 @@ router.get("/5b", async (req, res, next) => {
 //6a. Hiển thị tất cả các khách hàng có sinh nhật là hôm nay
 router.get("/6a", async (req, res, next) => {
   try {
-    const year = parseInt(req.query.year);
+    const today = new Date();
+    console.log(today);
+    const eqDay = {
+      $eq: [{ $dayOfMonth: "$birthday" }, { $dayOfMonth: today }],
+    };
+    const eqMonth = {
+      $expr: {
+        $eq: [{ $month: "$birthday" }, { $month: today }],
+      },
+    };
     const query = {
       $expr: {
-        $eq: [{ $year: "$birthday" }, year],
+        $and: [eqDay, eqMonth],
+      },
+    };
+    let results = await Customer.find(query);
+    res.send(results);
+  } catch (err) {
+    res.sendStatus(500);
+  }
+});
+//6a. Hiển thị tất cả các khách hàng có sinh nhật là X
+router.get("/6b", async (req, res, next) => {
+  try {
+    const birthday = new Date(
+      1990,
+      parseInt(req.query.birthdayMonth) - 1,
+      parseInt(req.query.birthdayDay) + 1
+    );
+    console.log(birthday);
+
+    const eqDay = {
+      $eq: [{ $dayOfMonth: "$birthday" }, { $dayOfMonth: birthday }],
+    };
+    const eqMonth = {
+      $expr: {
+        $eq: [{ $month: "$birthday" }, { $month: birthday }],
+      },
+    };
+    const query = {
+      $expr: {
+        $and: [eqDay, eqMonth],
       },
     };
     let results = await Customer.find(query);
